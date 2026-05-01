@@ -1,1 +1,8 @@
-export { default } from '../projects/page';
+'use client'
+import dynamic from 'next/dynamic'
+
+const App = dynamic(() => import('../../App'), { ssr: false })
+
+export default function ProjectPage() {
+  return <App />
+}
