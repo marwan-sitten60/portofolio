@@ -1,15 +1,21 @@
 /** @type {import('next').NextConfig} */
+const isGitHubPagesBuild = process.env.GITHUB_ACTIONS === 'true';
+
 const nextConfig = {
-  output: 'export',
-  distDir: 'dist',
   images: {
     unoptimized: true,
   },
-  basePath: process.env.GITHUB_ACTIONS ? '/revil' : '',
-  assetPrefix: process.env.GITHUB_ACTIONS ? '/revil/' : '',
   typescript: {
     ignoreBuildErrors: true,
-  }
+  },
+  ...(isGitHubPagesBuild
+    ? {
+        output: 'export',
+        distDir: 'dist',
+        basePath: '/revil',
+        assetPrefix: '/revil/',
+      }
+    : {}),
 };
 
 export default nextConfig;

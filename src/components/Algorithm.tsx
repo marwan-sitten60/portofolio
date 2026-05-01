@@ -1,6 +1,6 @@
 import { useEffect, useRef, useCallback } from 'react';
 import { doc, getDoc, updateDoc, increment, collection, getDocs, setDoc } from 'firebase/firestore';
-import { db } from '../lib/firebase';
+import { db, hasFirebaseConfig } from '../lib/firebase';
 import Alert from './Alert';
 import useSafeAlert from '../hooks/useSafeAlert';
 
@@ -87,6 +87,8 @@ export const Algorithm = ({ currentSection, isContactOpen, onNavigate }: Algorit
 
     // 1.5 Helper to increment specific daily stats in Firestore
     const incrementDailyStat = useCallback(async (field: 'projectViews' | 'socialClicks') => {
+        if (!hasFirebaseConfig) return;
+
         try {
             const today = new Date().toISOString().split('T')[0];
             const dailyRef = doc(db, 'Settings', 'Views', 'Analysis', 'Daily');
@@ -165,6 +167,8 @@ export const Algorithm = ({ currentSection, isContactOpen, onNavigate }: Algorit
     // 2.5 Global Analytics Tracking
     const hasTrackedVisit = useRef(false);
     useEffect(() => {
+        if (!hasFirebaseConfig) return;
+
         const trackGlobalVisit = async () => {
             if (hasTrackedVisit.current || currentSection === 'dashboard' || currentSection === 'secret') return;
             hasTrackedVisit.current = true;

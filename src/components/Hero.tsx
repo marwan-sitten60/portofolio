@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import anime from 'animejs';
 import { doc, onSnapshot } from 'firebase/firestore';
-import { db } from '../lib/firebase';
+import { db, hasFirebaseConfig } from '../lib/firebase';
 import { Plus, Briefcase } from 'lucide-react';
 
 // 1x1 transparent GIF to prevent empty src errors and allow onLoad to trigger properly
@@ -226,6 +226,8 @@ const AvailableBadge = ({ isDark, entryDelay = 1200, isReady = true }: { isDark:
     };
 
     useEffect(() => {
+        if (!hasFirebaseConfig) return;
+
         const unsubscribe = onSnapshot(doc(db, 'Settings', 'Availability'), (snap) => {
             if (snap.exists()) {
                 setAvailData(snap.data());
@@ -466,6 +468,14 @@ const Hero = ({ onLoaded, onAnimationComplete, isReady = true }: { onLoaded?: ()
     const hasNotifiedLoaded = useRef(false);
 
     useEffect(() => {
+        if (!hasFirebaseConfig) {
+            if (onLoaded && !hasNotifiedLoaded.current) {
+                hasNotifiedLoaded.current = true;
+                onLoaded();
+            }
+            return;
+        }
+
         const unsubscribe = onSnapshot(doc(db, 'Settings', 'Account'),
             (docSnapshot) => {
                 if (docSnapshot.exists()) {
