@@ -1,7 +1,5 @@
 /** @type {import('next').NextConfig} */
 const isGitHubPagesBuild = process.env.GITHUB_ACTIONS === 'true';
-const isVercelBuild = process.env.VERCEL === '1';
-const isStaticExportBuild = isGitHubPagesBuild || isVercelBuild;
 
 const nextConfig = {
   images: {
@@ -10,17 +8,13 @@ const nextConfig = {
   typescript: {
     ignoreBuildErrors: true,
   },
-  ...(isStaticExportBuild
+  ...(isGitHubPagesBuild
     ? {
         output: 'export',
         distDir: 'dist',
         trailingSlash: true,
-        ...(isGitHubPagesBuild
-          ? {
-              basePath: '/revil',
-              assetPrefix: '/revil/',
-            }
-          : {}),
+        basePath: '/revil',
+        assetPrefix: '/revil/',
       }
     : {}),
 };
