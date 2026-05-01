@@ -103,7 +103,7 @@ const CardVideo = ({ src, isActive }: { src: string; isActive: boolean }) => {
 const CardImage = ({ src, alt }: { src: string; alt: string }) => {
     const [isImageLoaded, setIsImageLoaded] = useState(false);
     const imagePath = src.split('?')[0].toLowerCase();
-    const isDepiCover = imagePath.includes('/projects/depi-cover-focused.png');
+    const isDepiCover = imagePath.includes('/project-assets/depi-cover-focused.png');
     const isIconImage = imagePath.endsWith('.svg') || isDepiCover;
 
     return (
@@ -463,7 +463,7 @@ const Projects = () => {
             name: 'DEPI Graduation Project',
             description: 'A graduation project built during the Digital Egypt Pioneers Initiative, presented as a practical data workflow and analytics solution.',
             fullDescription: 'A graduation project developed during the Digital Egypt Pioneers Initiative (DEPI). This project represents an applied analytics workflow that turns data into a clear, practical solution with a focus on reporting, insight generation, and real-world usability.',
-            images: ['/projects/depi-cover-focused.png'],
+            images: ['/project-assets/depi-cover-focused.png'],
             stack: ['Python', 'Pandas', 'NumPy', 'Matplotlib', 'Scikit-learn', 'SQL', 'Power BI', 'Azure Databricks'],
             tags: [
                 { id: 'python', name: 'Python', color: '#3776ab', iconSvg: '/icons/Python.svg' },
@@ -516,7 +516,7 @@ const Projects = () => {
             name: 'Customer Segmentation',
             description: 'A machine learning project for grouping customers into meaningful segments based on behavior, patterns, and business value.',
             fullDescription: 'A customer segmentation project that applies data analysis and machine learning techniques to identify meaningful customer groups. The project focuses on preparing customer data, discovering patterns, building segmentation logic, and presenting insights that can support targeting, retention, and business decisions.',
-            images: ['/projects/Customer-Segmentation.png'],
+            images: ['/project-assets/Customer-Segmentation.png'],
             stack: ['Python', 'Pandas', 'Scikit-learn', 'Matplotlib'],
             tags: [
                 { id: 'python', name: 'Python', color: '#3776ab', iconSvg: '/icons/Python.svg' },

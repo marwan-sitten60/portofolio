@@ -1,6 +1,6 @@
 import firebaseIcon from '../assets/svgs/firebase.svg';
 
-export const normalizeMediaList = (media: unknown, fallback: string[] = ['/projects/depi-cover-focused.png']) => {
+export const normalizeMediaList = (media: unknown, fallback: string[] = ['/project-assets/depi-cover-focused.png']) => {
     const list = Array.isArray(media) ? media : Object.values((media || {}) as Record<string, unknown>);
     const normalized = list
         .filter((item): item is string => typeof item === 'string')

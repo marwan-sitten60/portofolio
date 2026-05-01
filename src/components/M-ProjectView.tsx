@@ -405,7 +405,7 @@ const VideoPlayer = React.memo(({ src, isActive, isMobile, style }: { src: strin
 const ProjectMediaImage = ({ src }: { src: string }) => {
     const [isImageLoaded, setIsImageLoaded] = useState(false);
     const imagePath = src.split('?')[0].toLowerCase();
-    const isDepiCover = imagePath.includes('/projects/depi-cover-focused.png');
+    const isDepiCover = imagePath.includes('/project-assets/depi-cover-focused.png');
     const isIconImage = imagePath.endsWith('.svg') || isDepiCover;
 
     return (
