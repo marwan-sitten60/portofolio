@@ -6,8 +6,8 @@ import { db } from '../lib/firebase';
 import { collection, onSnapshot, doc } from 'firebase/firestore';
 
 import MProjectView from './M-ProjectView';
-import MContributorView, { Contributor } from './M-ContributorView';
-import { ProjectData as Project, TagData as Tag, ContributorData } from '../types';
+import { Contributor } from './M-ContributorView';
+import { ProjectData as Project, TagData as Tag } from '../types';
 import { getStackIcon, getTechColor, isVideoFile } from '../utils/projectUtils';
 
 interface RawContributorData {
@@ -316,8 +316,6 @@ const Projects = () => {
     const handwritingRef = useRef<HTMLDivElement>(null);
     const [availableContributors, setAvailableContributors] = useState<Contributor[]>([]);
     const [availableTags, setAvailableTags] = useState<Tag[]>([]);
-    const [selectedContributor, setSelectedContributor] = useState<Contributor | null>(null);
-    const [showContributorModal, setShowContributorModal] = useState(false);
     const [searchQuery, setSearchQuery] = useState('');
 
     // Fetch Data
@@ -632,7 +630,7 @@ const Projects = () => {
     }, []);
 
     useEffect(() => {
-        if (selectedProjectId || showContributorModal) {
+        if (selectedProjectId) {
             const scrollbarWidth = window.innerWidth - document.documentElement.clientWidth;
             document.body.style.overflow = 'hidden';
             document.body.style.paddingRight = `${scrollbarWidth}px`;
@@ -644,7 +642,7 @@ const Projects = () => {
             document.body.style.overflow = 'unset';
             document.body.style.paddingRight = '0px';
         };
-    }, [selectedProjectId, showContributorModal]);
+    }, [selectedProjectId]);
 
     return (
         <div className="min-h-screen bg-primary transition-colors duration-300 pt-32 pb-20">
@@ -700,7 +698,7 @@ const Projects = () => {
                             index={index}
                             onClick={() => {
                                 window.dispatchEvent(new CustomEvent('revil:project_open', { detail: { id: project.id } }));
-                                setSelectedProjectId(project.id);
+                                setSelectedProjectId(project.id == null ? null : String(project.id));
                             }}
                         />
                     ))}
@@ -720,12 +718,6 @@ const Projects = () => {
                 </AnimatePresence>
             </div>
 
-            {showContributorModal && selectedContributor && (
-                <MContributorView
-                    contributor={selectedContributor}
-                    onClose={() => setShowContributorModal(false)}
-                />
-            )}
         </div>
     );
 };

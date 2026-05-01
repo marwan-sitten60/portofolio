@@ -13,6 +13,7 @@ import useTheme from '../hooks/useTheme';
 interface MProjectViewProps {
     project: Project;
     onClose: () => void;
+    onContributorClick?: (contributor: Project['contributors'][number]) => void;
 }
 
 const GlassPanel = ({ children, style, className = "", isDark }: React.PropsWithChildren<{ style?: React.CSSProperties; className?: string; isDark?: boolean }>) => (

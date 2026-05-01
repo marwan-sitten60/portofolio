@@ -3,12 +3,14 @@ import { createPortal } from 'react-dom';
 import { motion } from 'framer-motion';
 import { X, Mail, Phone, MapPin, Globe, Github, Linkedin, Instagram, FileText } from 'lucide-react';
 import { useSocialTracker } from '../hooks/useSocialTracker';
+import type { ProjectData } from '../types';
 
 type StackItem = { id: string; name: string; icon?: string };
 
 interface MCVProps {
     isOpen: boolean;
     onClose: () => void;
+    onProjectClick?: (project: ProjectData) => void;
 }
 
 const MCV = ({ onClose }: Omit<MCVProps, 'isOpen'>) => {
