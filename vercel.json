@@ -2,5 +2,22 @@
   "$schema": "https://openapi.vercel.sh/vercel.json",
   "framework": "nextjs",
   "buildCommand": "npm run build",
-  "installCommand": "npm ci"
+  "installCommand": "npm ci",
+  "redirects": [
+    {
+      "source": "/projects",
+      "destination": "/#projects",
+      "permanent": false
+    },
+    {
+      "source": "/project",
+      "destination": "/#projects",
+      "permanent": false
+    },
+    {
+      "source": "/stack",
+      "destination": "/#stack",
+      "permanent": false
+    }
+  ]
 }
