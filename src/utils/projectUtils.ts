@@ -1,18 +1,29 @@
 import firebaseIcon from '../assets/svgs/firebase.svg';
 
-export const isVideoFile = (url: string) => {
+export const normalizeMediaList = (media: unknown, fallback: string[] = ['/projects/depi-cover-focused.png']) => {
+    const list = Array.isArray(media) ? media : Object.values((media || {}) as Record<string, unknown>);
+    const normalized = list
+        .filter((item): item is string => typeof item === 'string')
+        .map(item => item.trim())
+        .filter(Boolean);
+
+    return normalized.length > 0 ? normalized : fallback;
+};
+
+export const isVideoFile = (url: unknown) => {
+    if (typeof url !== 'string') return false;
     return url.split('?')[0].toLowerCase().match(/\.(mp4|webm|ogg|mov)$/) || url.includes('/videos/');
 };
 
-export const getStackIcon = (name: string) => {
-    const lowerName = name.toLowerCase();
+export const getStackIcon = (name: unknown) => {
+    const lowerName = typeof name === 'string' ? name.toLowerCase() : '';
     if (lowerName.includes('firebase')) return firebaseIcon;
     if (lowerName.includes('databricks')) return '/icons/azure-databricks.svg';
     return null;
 };
 
-export const getTechColor = (name: string) => {
-    const lower = name.toLowerCase();
+export const getTechColor = (name: unknown) => {
+    const lower = typeof name === 'string' ? name.toLowerCase() : '';
     if (lower.includes('react')) return '#61dafb';
     if (lower.includes('html')) return '#e34f26';
     if (lower.includes('css')) return '#1572b6';

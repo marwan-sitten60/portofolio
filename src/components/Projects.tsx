@@ -8,7 +8,7 @@ import { collection, onSnapshot, doc } from 'firebase/firestore';
 import MProjectView from './M-ProjectView';
 import { Contributor } from './M-ContributorView';
 import { ProjectData as Project, TagData as Tag } from '../types';
-import { getStackIcon, getTechColor, isVideoFile } from '../utils/projectUtils';
+import { getStackIcon, getTechColor, isVideoFile, normalizeMediaList } from '../utils/projectUtils';
 
 interface RawContributorData {
     Name?: string;
@@ -32,7 +32,7 @@ interface FirestoreProject {
     id: string;
     Title?: string;
     Description?: string;
-    "Project Images"?: string[];
+    "Project Images"?: unknown;
     Stack?: (string | RawTagData)[] | Record<string, string | RawTagData>;
     Tags?: Record<string, string | RawTagData>;
     Contributors?: Record<string, ProjectContributorData>;
@@ -144,17 +144,18 @@ const ProjectCard = ({ project, index, onClick }: { project: Project; index: num
     const [currentImageIndex, setCurrentImageIndex] = useState(0);
     const [isHovered, setIsHovered] = useState(false);
     const [showContributors, setShowContributors] = useState(false);
+    const media = useMemo(() => normalizeMediaList(project.images), [project.images]);
 
     // Slideshow logic (Card Hover)
     useEffect(() => {
         let interval: ReturnType<typeof setInterval> | undefined;
-        if (isHovered && project.images.length > 1) {
+        if (isHovered && media.length > 1) {
             interval = setInterval(() => {
-                setCurrentImageIndex((prev) => (prev + 1) % project.images.length);
+                setCurrentImageIndex((prev) => (prev + 1) % media.length);
             }, 2000);
         }
         return () => clearInterval(interval);
-    }, [isHovered, project.images.length]);
+    }, [isHovered, media.length]);
 
     // Cycle between Stack and Contributors
     useEffect(() => {
@@ -207,14 +208,14 @@ const ProjectCard = ({ project, index, onClick }: { project: Project; index: num
                     <div
                         className="flex h-full transition-transform duration-500 ease-in-out"
                         style={{
-                            width: `${project.images.length * 100}%`,
-                            transform: `translateX(-${(currentImageIndex * 100) / project.images.length}%)`,
+                            width: `${media.length * 100}%`,
+                            transform: `translateX(-${(currentImageIndex * 100) / media.length}%)`,
                         }}
                     >
-                        {project.images.map((img, i) => {
+                        {media.map((img, i) => {
                             const isVideo = isVideoFile(img);
                             return (
-                                <div key={i} style={{ width: `${100 / project.images.length}%` }} className="h-full relative overflow-hidden">
+                                <div key={i} style={{ width: `${100 / media.length}%` }} className="h-full relative overflow-hidden">
                                     {isVideo ? (
                                         <CardVideo src={img} isActive={isHovered && currentImageIndex === i} />
                                     ) : (
@@ -415,7 +416,7 @@ const Projects = () => {
 
             const resolveTag = (t: string | RawTagData) => {
                 const name = typeof t === 'string' ? t : (t.Name || 'Unix');
-                const globalTag = availableTags.find(gt => gt.name.toLowerCase() === name.toLowerCase());
+                const globalTag = availableTags.find(gt => (gt.name || '').toLowerCase() === name.toLowerCase());
 
                 return {
                     name,
@@ -439,7 +440,7 @@ const Projects = () => {
                 name: data.id,
                 description: data.Description || '',
                 fullDescription: data.Description || '',
-                images: data["Project Images"] || [],
+                images: normalizeMediaList(data["Project Images"], []),
                 stack: normalizedStack.map((t: Tag) => t.name),
                 tags: displayTags,
                 repoLink: data["Repository Link"] || '',
@@ -599,7 +600,7 @@ const Projects = () => {
             (project.stack || []).forEach(tech => {
                 minDistance = Math.min(minDistance, checkTerm(tech));
             });
-            project.contributors.forEach(c => {
+            (project.contributors || []).forEach(c => {
                 minDistance = Math.min(minDistance, checkTerm(c.name || ''));
             });
             return { project, minDistance };

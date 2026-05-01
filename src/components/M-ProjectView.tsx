@@ -5,7 +5,7 @@ import { X, Github, ExternalLink, ChevronLeft, ChevronRight, Upload, Play, Pause
 import { doc, onSnapshot, updateDoc, increment } from 'firebase/firestore';
 import { db } from '../lib/firebase';
 import { sanitizeSvg } from '../lib/sanitize';
-import { isVideoFile, getStackIcon, getTechColor } from '../utils/projectUtils';
+import { isVideoFile, getStackIcon, getTechColor, normalizeMediaList } from '../utils/projectUtils';
 import { ProjectData as Project, TagData as TagItem } from '../types';
 import useTheme from '../hooks/useTheme';
 
@@ -472,7 +472,7 @@ const MProjectView = ({ project: initialProject, onClose }: MProjectViewProps) =
     const [availableTags, setAvailableTags] = useState<TagItem[]>([]);
 
     const sortedMedia = React.useMemo(() => {
-        return [...(project.images || [])].sort((a, b) => {
+        return normalizeMediaList(project.images).sort((a, b) => {
             const isVidA = a.split('?')[0].toLowerCase().match(/\.(mp4|webm|ogg|mov)$/) || a.includes('/videos/');
             const isVidB = b.split('?')[0].toLowerCase().match(/\.(mp4|webm|ogg|mov)$/) || b.includes('/videos/');
             if (isVidA && !isVidB) return -1;
@@ -497,11 +497,13 @@ const MProjectView = ({ project: initialProject, onClose }: MProjectViewProps) =
 
     const handleNext = (e: React.MouseEvent) => {
         e.stopPropagation();
+        if (sortedMedia.length === 0) return;
         setCurrentImageIndex((prev) => (prev + 1) % sortedMedia.length);
     };
 
     const handlePrev = (e: React.MouseEvent) => {
         e.stopPropagation();
+        if (sortedMedia.length === 0) return;
         setCurrentImageIndex((prev) => (prev - 1 + sortedMedia.length) % sortedMedia.length);
     };
 
@@ -545,8 +547,8 @@ const MProjectView = ({ project: initialProject, onClose }: MProjectViewProps) =
 
     const displayTags = (project.tags && project.tags.length > 0)
         ? project.tags.map(t => {
-            const tagName = typeof t === 'string' ? t : t.name;
-            const globalTag = availableTags.find(gt => gt.name.toLowerCase() === tagName.toLowerCase());
+            const tagName = typeof t === 'string' ? t : (t.name || 'Unknown');
+            const globalTag = availableTags.find(gt => (gt.name || '').toLowerCase() === tagName.toLowerCase());
             return {
                 name: tagName,
                 color: (typeof t === 'object' ? t.color : null) || globalTag?.color || getTechColor(tagName),
@@ -554,8 +556,8 @@ const MProjectView = ({ project: initialProject, onClose }: MProjectViewProps) =
             };
         })
         : [
-            ...(project.stack || []).map(tech => {
-                const globalTag = availableTags.find(gt => gt.name.toLowerCase() === tech.toLowerCase());
+            ...(project.stack || []).filter((tech): tech is string => typeof tech === 'string' && tech.trim().length > 0).map(tech => {
+                const globalTag = availableTags.find(gt => (gt.name || '').toLowerCase() === tech.toLowerCase());
                 return {
                     name: tech,
                     color: globalTag?.color || getTechColor(tech),
@@ -602,7 +604,7 @@ const MProjectView = ({ project: initialProject, onClose }: MProjectViewProps) =
             if (!t) return { name: 'Unknown', color: '#60a5fa', iconSvg: '' };
             const name = typeof t === 'string' ? t : (t.name || t.Name || 'Unix');
             // Use ref to get latest tags without causing re-subscription
-            const globalTag = availableTagsRef.current.find(gt => gt.name.toLowerCase() === name.toLowerCase());
+            const globalTag = availableTagsRef.current.find(gt => (gt.name || '').toLowerCase() === name.toLowerCase());
 
             return {
                 name,
