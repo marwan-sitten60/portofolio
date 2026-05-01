@@ -24,7 +24,7 @@ const getSectionFromPath = (path: string): Section => {
 
   if (withoutGitHubBase === '/') return 'home';
   if (withoutGitHubBase === '/stack') return 'stack';
-  if (withoutGitHubBase === '/projects') return 'projects';
+  if (withoutGitHubBase === '/projects' || withoutGitHubBase === '/project') return 'projects';
   return 'view_link';
 };
 
