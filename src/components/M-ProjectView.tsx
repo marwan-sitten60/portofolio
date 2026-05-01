@@ -3,7 +3,7 @@ import { createPortal } from 'react-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, Github, ExternalLink, ChevronLeft, ChevronRight, Upload, Play, Pause, Volume2, VolumeX, Maximize } from 'lucide-react';
 import { doc, onSnapshot, updateDoc, increment } from 'firebase/firestore';
-import { db } from '../lib/firebase';
+import { db, hasFirebaseConfig } from '../lib/firebase';
 import { sanitizeSvg } from '../lib/sanitize';
 import { isVideoFile, getStackIcon, getTechColor, normalizeMediaList } from '../utils/projectUtils';
 import { ProjectData as Project, TagData as TagItem } from '../types';
@@ -573,6 +573,8 @@ const MProjectView = ({ project: initialProject, onClose }: MProjectViewProps) =
 
     // Fetch Global Tags for Icons/Colors
     useEffect(() => {
+        if (!hasFirebaseConfig) return;
+
         const unsub = onSnapshot(doc(db, 'Tags', 'Tags'), (docSnap) => {
             if (docSnap.exists()) {
                 const data = docSnap.data() as Record<string, { Name?: string; Color?: string; Icon?: string }>;
@@ -596,7 +598,7 @@ const MProjectView = ({ project: initialProject, onClose }: MProjectViewProps) =
 
     // Sync with Firestore for real-time views
     useEffect(() => {
-        if (!project.id) return;
+        if (!hasFirebaseConfig || !project.id) return;
 
         const projectRef = doc(db, 'Projects', String(project.id));
 

@@ -5,7 +5,7 @@ import { X, Send, Paperclip, User, Phone, MessageSquare, Check, Mail, Calendar, 
 import { doc, onSnapshot, runTransaction } from 'firebase/firestore';
 import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import { httpsCallable } from 'firebase/functions';
-import { db, storage, functions } from '../lib/firebase';
+import { db, storage, functions, hasFirebaseConfig } from '../lib/firebase';
 import Alert from './Alert'; // Import Custom Alert
 import useSafeAlert from '../hooks/useSafeAlert';
 import useTheme from '../hooks/useTheme';
@@ -147,6 +147,8 @@ const MContact = ({ onClose, initialTab = 'meeting', hideTabs = false }: Omit<MC
 
   // Sync Host Availability & Timezone
   useEffect(() => {
+    if (!hasFirebaseConfig) return;
+
     const unsubscribeAvailability = onSnapshot(doc(db, 'Settings', 'Availability'), (snap) => {
       if (snap.exists()) {
         const data = snap.data();
@@ -326,6 +328,12 @@ const MContact = ({ onClose, initialTab = 'meeting', hideTabs = false }: Omit<MC
   const handleMeetingSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
+    if (!hasFirebaseConfig) {
+      showAlert({ type: 'warning', message: 'Online booking is not configured yet. Please send a message instead.' });
+      setActiveTab('message');
+      return;
+    }
+
     // Basic Validation
     if (!selectedDate || !selectedTime) return;
     if (!meetingData.email || !meetingData.email.includes('@')) {
@@ -502,6 +510,16 @@ const MContact = ({ onClose, initialTab = 'meeting', hideTabs = false }: Omit<MC
     setIsSubmitting(true);
 
     try {
+      if (!hasFirebaseConfig) {
+        const subject = encodeURIComponent(`Portfolio contact from ${formData.name}`);
+        const body = encodeURIComponent(
+          `Name: ${formData.name}\nEmail: ${formData.email}\nPhone: ${formData.number}\nWhatsApp: ${formData.hasWhatsapp ? 'Yes' : 'No'}\n\n${formData.message}`
+        );
+        window.location.href = `mailto:marwansitten@gmail.com?subject=${subject}&body=${body}`;
+        showAlert({ type: 'success', message: 'Opening your email app...' });
+        return;
+      }
+
       const docRef = doc(db, 'Settings', 'Canary');
       // Use a transaction to safely generate the next email ID without race conditions
       await runTransaction(db, async (transaction) => {

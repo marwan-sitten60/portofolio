@@ -2,7 +2,7 @@ import { useEffect, useRef, useState, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import anime from 'animejs';
 import { X, Search } from 'lucide-react';
-import { db } from '../lib/firebase';
+import { db, hasFirebaseConfig } from '../lib/firebase';
 import { collection, onSnapshot, doc } from 'firebase/firestore';
 
 import MProjectView from './M-ProjectView';
@@ -321,6 +321,8 @@ const Projects = () => {
 
     // Fetch Data
     useEffect(() => {
+        if (!hasFirebaseConfig) return;
+
         // Contributors
         const unsubDoc = onSnapshot(doc(db, 'Tags', 'Contributors'), (docSnap) => {
             if (docSnap.exists()) {
@@ -384,6 +386,8 @@ const Projects = () => {
     const [rawProjects, setRawProjects] = useState<FirestoreProject[]>([]);
 
     useEffect(() => {
+        if (!hasFirebaseConfig) return;
+
         const unsub = onSnapshot(collection(db, 'Projects'), (snapshot) => {
             setRawProjects(snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })));
         });
