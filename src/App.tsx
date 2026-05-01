@@ -18,17 +18,28 @@ import { ProjectData as Project, ContributorData as Contributor } from './types'
 
 type Section = 'home' | 'stack' | 'projects' | 'secret' | 'dashboard' | 'view_link';
 
+const getSectionFromPath = (path: string): Section => {
+  const cleanPath = path.replace(/\/$/, '');
+  const withoutGitHubBase = cleanPath.replace(/^\/revil(?=\/|$)/, '') || '/';
+
+  if (withoutGitHubBase === '/') return 'home';
+  if (withoutGitHubBase === '/stack') return 'stack';
+  if (withoutGitHubBase === '/projects') return 'projects';
+  return 'view_link';
+};
+
+const getPathForSection = (section: Section) => {
+  const basePath = typeof window !== 'undefined' && window.location.pathname.startsWith('/revil') ? '/revil' : '';
+
+  if (section === 'stack') return `${basePath}/stack`;
+  if (section === 'projects') return `${basePath}/projects`;
+  return `${basePath}/`;
+};
+
 function App() {
   const [currentSection, setCurrentSection] = useState<Section>(() => {
     if (typeof window === 'undefined') return 'home';
-    const path = window.location.pathname;
-    const base = "";
-    const normPath = path.replace(/\/$/, '');
-    const normBase = base.replace(/\/$/, '');
-    if (normPath !== normBase && normPath !== '') {
-      return 'view_link';
-    }
-    return 'home';
+    return getSectionFromPath(window.location.pathname);
   });
   const [previousSection, setPreviousSection] = useState<Section>('home');
   const [isTransitioning, setIsTransitioning] = useState(false);
@@ -100,6 +111,13 @@ function App() {
 
   const navigateTo = useCallback((section: Section) => {
     if (section !== currentSection && !isTransitioning) {
+      if (section === 'home' || section === 'stack' || section === 'projects') {
+        const nextPath = getPathForSection(section);
+        if (window.location.pathname !== nextPath) {
+          window.history.pushState({}, '', nextPath);
+        }
+      }
+
       const order: Section[] = ['home', 'stack', 'projects'];
       const currIdx = order.indexOf(currentSection);
       const nextIdx = order.indexOf(section);
@@ -124,6 +142,15 @@ function App() {
       setIsTransitioning(true);
     }
   }, [currentSection, isTransitioning]);
+
+  useEffect(() => {
+    const handlePopState = () => {
+      setCurrentSection(getSectionFromPath(window.location.pathname));
+    };
+
+    window.addEventListener('popstate', handlePopState);
+    return () => window.removeEventListener('popstate', handlePopState);
+  }, []);
 
   const handleCurtainCovered = useCallback(() => { }, []);
 
