@@ -1,8 +1,5 @@
-'use client'
-import dynamic from 'next/dynamic'
+import { redirect } from 'next/navigation';
 
-const App = dynamic(() => import('../../App'), { ssr: false })
-
-export default function ProjectsPage() {
-  return <App />
+export default function ProjectsPage(): never {
+  redirect('/#projects');
 }

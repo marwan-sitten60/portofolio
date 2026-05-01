@@ -1,8 +1,5 @@
-'use client'
-import dynamic from 'next/dynamic'
+import { redirect } from 'next/navigation';
 
-const App = dynamic(() => import('../../App'), { ssr: false })
-
-export default function StackPage() {
-  return <App />
+export default function StackPage(): never {
+  redirect('/#stack');
 }
