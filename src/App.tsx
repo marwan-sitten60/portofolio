@@ -18,7 +18,11 @@ import { ProjectData as Project, ContributorData as Contributor } from './types'
 
 type Section = 'home' | 'stack' | 'projects' | 'secret' | 'dashboard' | 'view_link';
 
-const getSectionFromPath = (path: string): Section => {
+const getSectionFromPath = (path: string, hash = ''): Section => {
+  const cleanHash = hash.replace(/^#/, '').toLowerCase();
+  if (cleanHash === 'stack') return 'stack';
+  if (cleanHash === 'projects' || cleanHash === 'project') return 'projects';
+
   const cleanPath = path.replace(/\/$/, '');
   const withoutGitHubBase = cleanPath.replace(/^\/revil(?=\/|$)/, '') || '/';
 
@@ -31,15 +35,17 @@ const getSectionFromPath = (path: string): Section => {
 const getPathForSection = (section: Section) => {
   const basePath = typeof window !== 'undefined' && window.location.pathname.startsWith('/revil') ? '/revil' : '';
 
-  if (section === 'stack') return `${basePath}/stack`;
-  if (section === 'projects') return `${basePath}/projects`;
+  if (section === 'stack') return `${basePath}/#stack`;
+  if (section === 'projects') return `${basePath}/#projects`;
   return `${basePath}/`;
 };
+
+const getCurrentPath = () => `${window.location.pathname}${window.location.hash}`;
 
 function App() {
   const [currentSection, setCurrentSection] = useState<Section>(() => {
     if (typeof window === 'undefined') return 'home';
-    return getSectionFromPath(window.location.pathname);
+    return getSectionFromPath(window.location.pathname, window.location.hash);
   });
   const [previousSection, setPreviousSection] = useState<Section>('home');
   const [isTransitioning, setIsTransitioning] = useState(false);
@@ -58,7 +64,7 @@ function App() {
   // Version Control & Forced Cache Invalidation
   // Update APP_VERSION whenever you want to force all return users to clear their localStorage
   useEffect(() => {
-    const APP_VERSION = 'v1.0.1'; // Change this to force a wipe
+    const APP_VERSION = 'v1.0.2'; // Change this to force a wipe
     if (typeof window !== 'undefined' && typeof localStorage !== 'undefined') {
       const currentVersion = localStorage.getItem('revil_app_version');
       if (currentVersion !== APP_VERSION) {
@@ -113,7 +119,7 @@ function App() {
     if (section !== currentSection && !isTransitioning) {
       if (section === 'home' || section === 'stack' || section === 'projects') {
         const nextPath = getPathForSection(section);
-        if (window.location.pathname !== nextPath) {
+        if (getCurrentPath() !== nextPath) {
           window.history.pushState({}, '', nextPath);
         }
       }
@@ -144,12 +150,16 @@ function App() {
   }, [currentSection, isTransitioning]);
 
   useEffect(() => {
-    const handlePopState = () => {
-      setCurrentSection(getSectionFromPath(window.location.pathname));
+    const handleLocationChange = () => {
+      setCurrentSection(getSectionFromPath(window.location.pathname, window.location.hash));
     };
 
-    window.addEventListener('popstate', handlePopState);
-    return () => window.removeEventListener('popstate', handlePopState);
+    window.addEventListener('popstate', handleLocationChange);
+    window.addEventListener('hashchange', handleLocationChange);
+    return () => {
+      window.removeEventListener('popstate', handleLocationChange);
+      window.removeEventListener('hashchange', handleLocationChange);
+    };
   }, []);
 
   const handleCurtainCovered = useCallback(() => { }, []);
