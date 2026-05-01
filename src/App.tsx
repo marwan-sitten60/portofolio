@@ -18,13 +18,33 @@ import { ProjectData as Project, ContributorData as Contributor } from './types'
 
 type Section = 'home' | 'stack' | 'projects' | 'secret' | 'dashboard' | 'view_link';
 
+const githubPagesBasePaths = ['/portofolio', '/revil'];
+
+const stripGitHubPagesBasePath = (path: string) => {
+  for (const basePath of githubPagesBasePaths) {
+    if (path === basePath || path.startsWith(`${basePath}/`)) {
+      return path.slice(basePath.length) || '/';
+    }
+  }
+
+  return path || '/';
+};
+
+const getActiveBasePath = () => {
+  if (typeof window === 'undefined') return '';
+
+  return githubPagesBasePaths.find((basePath) => (
+    window.location.pathname === basePath || window.location.pathname.startsWith(`${basePath}/`)
+  )) || '';
+};
+
 const getSectionFromPath = (path: string, hash = ''): Section => {
   const cleanHash = hash.replace(/^#/, '').toLowerCase();
   if (cleanHash === 'stack') return 'stack';
   if (cleanHash === 'projects' || cleanHash === 'project') return 'projects';
 
   const cleanPath = path.replace(/\/$/, '');
-  const withoutGitHubBase = cleanPath.replace(/^\/revil(?=\/|$)/, '') || '/';
+  const withoutGitHubBase = stripGitHubPagesBasePath(cleanPath);
 
   if (withoutGitHubBase === '/') return 'home';
   if (withoutGitHubBase === '/stack') return 'stack';
@@ -33,7 +53,7 @@ const getSectionFromPath = (path: string, hash = ''): Section => {
 };
 
 const getPathForSection = (section: Section) => {
-  const basePath = typeof window !== 'undefined' && window.location.pathname.startsWith('/revil') ? '/revil' : '';
+  const basePath = getActiveBasePath();
 
   if (section === 'stack') return `${basePath}/#stack`;
   if (section === 'projects') return `${basePath}/#projects`;

@@ -1,5 +1,5 @@
-import { redirect } from 'next/navigation';
+import SectionRedirect from '../SectionRedirect';
 
-export default function StackPage(): never {
-  redirect('/#stack');
+export default function StackPage() {
+  return <SectionRedirect section="stack" label="Open Stack" />;
 }

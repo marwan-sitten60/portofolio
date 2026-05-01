@@ -1,5 +1,6 @@
 /** @type {import('next').NextConfig} */
-const isGitHubPagesBuild = process.env.GITHUB_ACTIONS === 'true';
+const isGitHubPagesBuild = process.env.GITHUB_ACTIONS === 'true' || process.env.GITHUB_PAGES === 'true';
+const githubPagesBasePath = '/portofolio';
 
 const nextConfig = {
   images: {
@@ -13,8 +14,8 @@ const nextConfig = {
         output: 'export',
         distDir: 'dist',
         trailingSlash: true,
-        basePath: '/revil',
-        assetPrefix: '/revil/',
+        basePath: githubPagesBasePath,
+        assetPrefix: `${githubPagesBasePath}/`,
       }
     : {}),
 };

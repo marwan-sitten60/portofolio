@@ -1,5 +1,5 @@
-import { redirect } from 'next/navigation';
+import SectionRedirect from '../SectionRedirect';
 
-export default function ProjectPage(): never {
-  redirect('/#projects');
+export default function ProjectPage() {
+  return <SectionRedirect section="projects" label="Open Projects" />;
 }
